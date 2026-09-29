@@ -1,6 +1,8 @@
 #include "minemu/boot.h"
 #include "minemu/trap.h"
 #include "minemu/trace.h"
+#include "minemu/platform.h"
+void print_input(char* str);
 
 void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
     if ((uintptr_t)boot_info != MINEMU_BOOT_INFO_VADDR ||
@@ -14,6 +16,9 @@ void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
         minemu_trace_event(UINT32_C(0xb007bad0));
         minemu_fail_stop();
     }
+    print_input("hello world0");
     minemu_trace_event(1);
     minemu_fail_stop();
 }
+
+
