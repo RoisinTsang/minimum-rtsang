@@ -2,14 +2,15 @@ ARM_PREFIX ?= arm-none-eabi-
 CC := $(ARM_PREFIX)gcc
 AR := $(ARM_PREFIX)ar
 
+
 BUILD := build
 KERNEL := $(BUILD)/minimum-kernel.elf
 RUNTIME := $(BUILD)/libminemu_kernel.a
 
 CORE_OBJECT := $(BUILD)/core/main.o \
 				$(BUILD)/core/hw1_task1.o \
-				$(BUILD)/core/hw1_task2.o \
-				$(BUILD)/core/trampoline.o
+				$(BUILD)/core/hw1_task2.o 
+				
 
 RUNTIME_OBJECTS := \
 	$(BUILD)/runtime/block.o \
@@ -17,7 +18,8 @@ RUNTIME_OBJECTS := \
 	$(BUILD)/runtime/memory.o \
 	$(BUILD)/runtime/trace.o \
 	$(BUILD)/startup/boot.o \
-	$(BUILD)/startup/vectors.o 
+	$(BUILD)/startup/vectors.o \
+	$(BUILD)/startup/trampoline.o
 
 OBJECTS := $(CORE_OBJECT) $(RUNTIME_OBJECTS)
 DEPENDENCIES := $(OBJECTS:.o=.d)

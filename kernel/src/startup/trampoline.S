@@ -22,7 +22,7 @@
 ^^ trap frame layout for ref */
 
 minemu_irq_trampoline:
-    sub sp, sp #88 //allocate trap frame
+    sub sp, sp, #88 /*allocate trap frame*/
     stmia sp, {r0-r12}
     str lr, [sp, #52] //return_lr
     mrs r1, spsr
@@ -35,9 +35,9 @@ minemu_irq_trampoline:
     str r1, [sp, #68] //save 0 to dfsr
     str r1, [sp, #72] //save 0 to dfar
     add r1, sp, #76 
-    stmia r1, {sp, lr}^ //idk, from example
+    stmia r1, {sp, lr}^ 
     mov r1, #0 
-    str r1, [sp, #84] //
+    str r1, [sp, #84]
     mov r0, sp
 
     bl minemu_irq_dispatch //call dispatch
@@ -50,4 +50,4 @@ minemu_irq_trampoline:
     ldmia r1, {sp, lr}^ 
     ldmia sp, {r0-r12} //recover regs
     add sp, sp, #88 //pop stack
-    subs pc, lr, #4 //recover lr
+    subs pc, lr, #4 

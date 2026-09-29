@@ -4,6 +4,8 @@
 #include "minemu/platform.h"
 void command_prompt();
 void print_input(char* str);
+void minemu_irq_trampoline(void);
+char buf[500];
 
 
 void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
@@ -19,15 +21,24 @@ void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
         minemu_fail_stop();
     }
     
-    MINEMU_INTERRUPT->enable = UINT32_C(1) << MINEMU_IRQ_UART0;
-    if(UINT32_C(1) << MINEMU_IRQ_UART0){
-        print_input("halp0");
-    }
-    
 
+    //when catch interrupt, call trampoline
+    command_prompt();
+    print_input("\n\0");
+    command_prompt();
+    //minemu_irq_trampoline(); //<-- saves regs and status to stack
+    
+    MINEMU_INTERRUPT->enable = 1;
+    while(1){
+        if(MINEMU_INTERRUPT->pending != 0){
+            print_input("halp\0");
+        }
+    
+    
 
     minemu_trace_event(1);
     minemu_fail_stop();
+    }
 }
 
 

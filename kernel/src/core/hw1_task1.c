@@ -7,7 +7,7 @@ void print_input(char* str){
         //int len = sizeof(str)/sizeof(str[0]);
         if(MINEMU_UART0->status & MINEMU_UART_STATUS_TX_READY){
             char byte = str[count];
-            if(byte == '0'){
+            if(byte == '\0'){
                 break;
             }
             MINEMU_UART0->tx_data = (uint32_t)byte;
