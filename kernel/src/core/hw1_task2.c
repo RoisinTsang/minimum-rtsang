@@ -3,7 +3,8 @@
 #include <stdint.h>
 #include "minemu/irq.h"
 void print_input(char* str);
-extern char buf[500];
+
+
 static volatile uint32_t interrupt_count;
 static struct minemu_trap_frame task_b_storage __attribute__((aligned(8)));
 static struct minemu_trap_frame *task_a_frame;
@@ -23,13 +24,15 @@ int uart0_interrupt_handler(){
     print_input("handler called\0");
     int count = 0;
     //MINEMU_UART0->rx_data != 0
-    while(MINEMU_UART0->status & MINEMU_UART_STATUS_RX_READY){
+    //MINEMU_UART0->status & MINEMU_UART_STATUS_RX_READY
+    while(1){
        //idk store it somewhere 
-        buf[count] = MINEMU_UART0->rx_data;
+        //buff[count] = (char)MINEMU_UART0->rx_data;
         if(count > 500){
             print_input("you talk too much\0");
             return 1;
         }
+        count++;
     }
     return 1;
 }
