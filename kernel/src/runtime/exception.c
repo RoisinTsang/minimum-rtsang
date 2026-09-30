@@ -1,5 +1,6 @@
 #include "minemu/irq.h"
 #include "minemu/syscall.h"
+void print_input(char* str);
 
 void minemu_fail_stop(void) {
     for (;;) {

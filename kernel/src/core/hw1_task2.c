@@ -20,27 +20,30 @@ void command_prompt(){
 
 int uart0_interrupt_handler(){
     //read from UART0 and save data somewhere
+    print_input("handler called\0");
     int count = 0;
-    while(MINEMU_UART0->rx_data != 0){
+    //MINEMU_UART0->rx_data != 0
+    while(MINEMU_UART0->status & MINEMU_UART_STATUS_RX_READY){
        //idk store it somewhere 
         buf[count] = MINEMU_UART0->rx_data;
         if(count > 500){
-            print_input("you talk too much0");
+            print_input("you talk too much\0");
             return 1;
         }
     }
     return 1;
 }
 
-struct minemu_trap_frame *minemu_irq_dispatch(struct minemu_trap_frame *frame) {
-    print_input("called\0");
+struct minemu_trap_frame *minemu_irq_dispatchi(struct minemu_trap_frame *frame) {
+    MINEMU_UART0->tx_data = (uint32_t)'i';
     uint32_t source = (uint32_t)frame->exception_id;
     ++interrupt_count;
     if (source == MINEMU_IRQ_SYSTICK) {
         MINEMU_SYSTICK->ack = MINEMU_SYSTICK_ACK;
     } else if (source == MINEMU_IRQ_UART0) {
-        if (uart0_interrupt_handler() != 1){
-            //panic?
+        int i = uart0_interrupt_handler();
+        if(i != 1){
+            print_input("halp\0");
         }
         //(void)MINEMU_UART0->rx_data;
     } else if (source == MINEMU_IRQ_UART1) {

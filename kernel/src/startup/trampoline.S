@@ -4,7 +4,7 @@
 
 .global minemu_irq_trampoline
 .type minemu_irq_trampoline, %function
-.extern minemu_irq_dispatch
+.extern minemu_irq_dispatchi
 /*struct minemu_trap_frame {
     uint32_t r[13];
     uint32_t return_lr;
@@ -40,7 +40,7 @@ minemu_irq_trampoline:
     str r1, [sp, #84]
     mov r0, sp
 
-    bl minemu_irq_dispatch //call dispatch
+    bl minemu_irq_dispatchi //call dispatch
 
     mov sp, r0  //recover sp
     ldr lr, [sp, #52] //recover return_lr
