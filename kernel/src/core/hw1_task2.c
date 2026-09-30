@@ -2,10 +2,18 @@
 #include "minemu/trap.h"
 #include <stdint.h>
 #include "minemu/irq.h"
-extern char buf[500];
-
 void print_input(char* str);
-
+extern char buf[500];
+static volatile uint32_t interrupt_count;
+static struct minemu_trap_frame task_b_storage __attribute__((aligned(8)));
+static struct minemu_trap_frame *task_a_frame;
+static struct minemu_trap_frame *task_b_frame;
+static void task_b(void) {
+    for (;;) {
+        __asm__ volatile("nop");
+    }
+}
+void print_input(char* str);
 void command_prompt(){
     print_input("msh>\0");
 }
@@ -24,18 +32,8 @@ int uart0_interrupt_handler(){
     return 1;
 }
 
-//stuff from ex:??
-static volatile uint32_t interrupt_count;
-static struct minemu_trap_frame task_b_storage __attribute__((aligned(8)));
-static struct minemu_trap_frame *task_a_frame;
-static struct minemu_trap_frame *task_b_frame;
-
-static void task_b(void) {
-    for (;;) {
-        __asm__ volatile("nop");
-    }
-}
 struct minemu_trap_frame *minemu_irq_dispatch(struct minemu_trap_frame *frame) {
+    print_input("called\0");
     uint32_t source = (uint32_t)frame->exception_id;
     ++interrupt_count;
     if (source == MINEMU_IRQ_SYSTICK) {
