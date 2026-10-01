@@ -4,8 +4,9 @@
 #include "minemu/irq.h"
 void print_input(char* str);
 void print_char(char c);
-void cmd_nt_fnd();
+void cmd_nt_fnd(char* str);
 int find_start(int len);
+int find_word(int i, int f);
 extern char buff[500];
 
 
@@ -50,24 +51,24 @@ int uart0_interrupt_handler(){
 }
 
 void interp(int len){
-    if((buff[0] != ' ') & (buff[0] != 'e')){
-        cmd_nt_fnd();
+    int start = find_start(len);
+    int end_first_word = find_word(start, len);
+    char first_word[start-end_first_word+1];
+    for(int a = start; a<end_first_word; a++){
+        first_word[a] = buff[a];
+    }
+    first_word[end_first_word+1] = '\0';
+    if ((buff[start] != 'e') | (buff[start+1]  != 'c') | (buff[start+2] != 'h') | (buff[start+3] != 'o') | (buff [start+4] != ' ')){
+        cmd_nt_fnd(first_word);
     }
     else{
-        int start = find_start(len);
-        if ((buff[start] != 'e') | (buff[start+1]  != 'c') | (buff[start+2] != 'h') | (buff[start+3] != 'o') | (buff [start+4] != ' ')){
-            cmd_nt_fnd();
+        for(int i = start+5; i < len; i++){
+            print_char(buff[i]);
         }
-        else{
-            for(int i = start+5; i < len; i++){
-                print_char(buff[i]);
-            }
-            print_input("\n");
+        print_input("\n");
             
-        }
-        
     }
-
+        
     for(int i = 0; i<500; i++){
         buff[i] = '\0'; //clear the buffer for next time
     }
@@ -83,10 +84,18 @@ int find_start(int len){
     }
     return i;
 }
+int find_word(int start, int len){
+    for(int i = start; i<len; i++){
+        if(buff[i] == ' '){
+            return i;
+        }
+    }
+    return len;
+}
 
-void cmd_nt_fnd(){
+void cmd_nt_fnd(char* str){
     print_input("command not found: ");
-    print_input(buff);
+    print_input(str);
     print_input("\n");
 }
 
