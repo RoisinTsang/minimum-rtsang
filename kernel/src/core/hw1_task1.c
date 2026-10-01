@@ -15,3 +15,15 @@ void print_input(char* str){
         }
     }
 }
+/*
+void print_num(int n){
+    if (n<= 9){
+        char x = (char) (n+30);
+        MINEMU_UART0->tx_data = (uint32_t)x;
+    }
+    else{
+        
+    }
+    
+}
+    */

@@ -6,6 +6,7 @@ void command_prompt();
 void print_input(char* str);
 //void minemu_irq_trampoline(void);
 char buff[500]= {0};
+int count;
 
 
 void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
@@ -23,6 +24,7 @@ void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
     
     MINEMU_INTERRUPT->enable = (UINT32_C(1) << MINEMU_IRQ_UART0);
     MINEMU_UART0->control = MINEMU_UART_CONTROL_RX_IRQ_ENABLE;
+    count = 0;
     //MINEMU_UART0->status = MINEMU_UART_STATUS_RX_READY;
     //when catch interrupt, call trampoline
     command_prompt();
