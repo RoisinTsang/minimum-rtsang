@@ -27,7 +27,8 @@ minemu_irq_trampoline:
     str lr, [sp, #52] //return_lr
     mrs r1, spsr
     str r1, [sp, #56] //spsr
-    ldr r1, =0x10000008 /*load source id from claim register into r1*/
+    ldr r1, =0x10000000
+    ldr r1, [r1, #8] /*load source id from claim register into r1, idk why we can't just ldr from 0x10000008?*/
     str r1, [sp, #60] //exception_id
     sub r1, lr, #4  //adjust lr to record interrupted instruction address
     str r1, [sp, #64] //fault_pc

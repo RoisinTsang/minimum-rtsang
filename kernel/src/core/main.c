@@ -5,7 +5,7 @@
 void command_prompt();
 void print_input(char* str);
 //void minemu_irq_trampoline(void);
-//char buff[500]= {0};
+char buff[500]= {0};
 
 
 void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
@@ -26,16 +26,12 @@ void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
     //MINEMU_UART0->status = MINEMU_UART_STATUS_RX_READY;
     //when catch interrupt, call trampoline
     command_prompt();
-    //buff[0] = 'o';
-    //print_input("\n\0");
-    //command_prompt();
-    //minemu_irq_trampoline(); //<-- saves regs and status to stack
     __asm__ volatile("cpsie i" : : : "memory");
     for (;;) {
         __asm__ volatile("nop");
     }
-
-    command_prompt();
+    print_input(buff);
+    //command_prompt();
    
     minemu_trace_event(1);
     minemu_fail_stop();

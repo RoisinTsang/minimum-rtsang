@@ -16,7 +16,8 @@ static void task_b(void) {
 }
 
 struct minemu_trap_frame *minemu_irq_dispatch(struct minemu_trap_frame *frame) {
-    uint32_t source = (uint32_t)frame->exception_id;
+    uint32_t source = (uint32_t) MINEMU_INTERRUPT->claim;
+    //frame->exception_id;
     ++interrupt_count;
     if (source == MINEMU_IRQ_SYSTICK) {
         MINEMU_SYSTICK->ack = MINEMU_SYSTICK_ACK;
