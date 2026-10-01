@@ -3,7 +3,9 @@
 #include <stdint.h>
 #include "minemu/irq.h"
 void print_input(char* str);
-
+void print_char(char c);
+void cmd_nt_fnd();
+int find_start(int len);
 extern char buff[500];
 
 
@@ -21,24 +23,6 @@ void print_input(char* str);
 void command_prompt(){
     print_input("msh>\0");
 }
-/*//read from UART0 and save data somewhere
-    //print_input("handler called\0");
-    //MINEMU_UART0->rx_data != 0
-    //
-    while(MINEMU_UART0->status & MINEMU_UART_STATUS_RX_READY){
-       //idk store it somewhere 
-        buff[count] = (char)MINEMU_UART0->rx_data;
-        if(count > 500){
-            //print_input("you talk too much\0");
-            return 1;
-        }
-        count++;
-    }
-    if(buff[count-1] != '\n'){
-        uart0_interrupt_handler();
-    }
-    buff[count] = '\0';
-    return 1;*/
 
 int uart0_interrupt_handler(){
     
@@ -65,8 +49,43 @@ int uart0_interrupt_handler(){
     return 1;
 }
 
-void interp(){
-    print_input("interp called");
+void interp(int len){
+    if((buff[0] != ' ') & (buff[0] != 'e')){
+        cmd_nt_fnd();
+    }
+    else{
+        int start = find_start(len);
+        if ((buff[start] != 'e') | (buff[start+1]  != 'c') | (buff[start+2] != 'h') | (buff[start+3] != 'o') | (buff [start+4] != ' ')){
+            cmd_nt_fnd();
+        }
+        else{
+            for(int i = start+5; i < len; i++){
+                print_char(buff[i]);
+            }
+            print_input("\n");
+            
+        }
+        
+    }
+
+    for(int i = 0; i<500; i++){
+        buff[i] = '\0'; //clear the buffer for next time
+    }
+    command_prompt();
+}
+
+int find_start(int len){
+    int i = 0;
+    char c = buff[i];
+    while((c == ' ')& (i < len) ){
+        i++;
+        c= buff[i];
+    }
+    return i;
+}
+
+void cmd_nt_fnd(){
+    print_input("command not found: ");
     print_input(buff);
     print_input("\n");
 }
@@ -84,7 +103,7 @@ struct minemu_trap_frame *minemu_irq_dispatchi(struct minemu_trap_frame *frame) 
     }else if (source == MINEMU_IRQ_UART0) {
         int i = uart0_interrupt_handler();
         if((buff[i] == '\n')){
-                interp();
+                interp(i);
             }
         //(void)MINEMU_UART0->rx_data;
     } else if (source == MINEMU_IRQ_UART1) {
