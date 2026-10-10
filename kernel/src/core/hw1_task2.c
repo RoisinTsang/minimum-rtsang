@@ -22,7 +22,7 @@ static void task_b(void) {
 }
 void print_input(char* str);
 void command_prompt(){
-    print_input("msh>\0");
+    print_input("msh> \0");
 }
 
 int uart0_interrupt_handler(){
