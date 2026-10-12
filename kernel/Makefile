@@ -10,7 +10,9 @@ RUNTIME := $(BUILD)/libminemu_kernel.a
 CORE_OBJECT := $(BUILD)/core/main.o \
 				$(BUILD)/core/hw1_task1.o \
 				$(BUILD)/startup/trampoline.o \
-				$(BUILD)/core/hw1_task2.o 
+				$(BUILD)/core/hw1_task2.o \
+				$(BUILD)/core/hw2_task1.o\
+				$(BUILD)/core/ioctl.o
 				
 				
 
