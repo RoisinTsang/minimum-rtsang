@@ -30,6 +30,12 @@
 #define MINEMU_IOCTL_MAX_TRANSFER 256
 #define MINEMU_IOCTL_ERROR (-1)
 
+#define USER_STACK_BOTTOM UINT32_C(0x007ff000)
+#define USER_STACK_TOP UINT32_C(0x00800000)
+
+#define MINEMU_HELLO_SYSCALL_UART_PUTCHAR 1
+#define MINEMU_HELLO_SYSCALL_ERROR (-1)
+
 #ifndef __ASSEMBLER__
 #include <stddef.h>
 #include <stdint.h>

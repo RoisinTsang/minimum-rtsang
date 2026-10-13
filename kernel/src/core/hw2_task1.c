@@ -1,5 +1,5 @@
 //make dispatch for svc 
-
+/*
 #include <stdarg.h>
 #include <stdint.h>
 #include "minemu/user_abi.h"
@@ -23,18 +23,11 @@
 #define CPSR_THUMB UINT32_C(0x20)
 #define A32_SVC_ZERO UINT32_C(0xef000000)
 #define TRACE_USER_SYSCALL UINT32_C(0x48454c10)
+#define MINEMU_HELLO_SYSCALL_UART_PUTCHAR 1
+#define MINEMU_HELLO_SYSCALL_ERROR (-1)
 
 enum { frame_words = sizeof(struct minemu_trap_frame) / sizeof(uint32_t), task_stack_words = 256 };
 
-static uint32_t task_b_stack[task_stack_words] __attribute__((aligned(8)));
-static uint32_t *task_a_frame;
-static uint32_t *task_b_frame;
-
-static void task_b(void) {
-    for (;;) {
-        __asm__ volatile("svc #0" : : : "memory");
-    }
-}
 
 struct minemu_trap_frame *minemu_svc_dispatch(struct minemu_trap_frame *frame) {
     uint32_t mode = frame->spsr & CPSR_MODE_MASK;
@@ -50,11 +43,6 @@ struct minemu_trap_frame *minemu_svc_dispatch(struct minemu_trap_frame *frame) {
         frame->r[0] = (uint32_t)MINEMU_HELLO_SYSCALL_ERROR;
         return frame;
     }
-
-    if (!user_syscall_observed) {
-        minemu_trace_event(TRACE_USER_SYSCALL);
-        user_syscall_observed = true;
-    }
     MINEMU_UART0->tx_data = frame->r[0];
     frame->r[0] = 0;
     return frame;
@@ -68,9 +56,9 @@ int32_t ioctl(int fd, uint32_t op, ...){
     va_start(params, op);
     
     if(fd == 0x10003000){
-        /*RNG*/
+        //RNG
         if(op == 0){
-            /*update seed*/
+            //update seed
             unsigned int seed = va_arg(params, unsigned int);
             if(rng_set_seed(seed) ==0){
                 return 0;
@@ -80,7 +68,7 @@ int32_t ioctl(int fd, uint32_t op, ...){
             }
         }
         else if(op == 1){
-            /*data pointer*/
+            //data pointer
             unsigned int * data = va_arg(params, unsigned int*);
             if(rng_get_data(data)==0){
                 return 0;
@@ -95,9 +83,9 @@ int32_t ioctl(int fd, uint32_t op, ...){
 
     }
     else if(fd == 0x10004000){
-        /*UART0*/
+        //UART0
         if(op == 0){
-            /*read*/
+            //read
             char* dst = va_arg(params, char*);
             int n =va_arg(params, int);
             if(uart0_read(dst, n)){
@@ -108,7 +96,7 @@ int32_t ioctl(int fd, uint32_t op, ...){
             }
         }
         else if(op == 1){
-            /*write*/
+            //write
             char* src = va_arg(params, char*);
             int n = va_arg(params, int);
             if(uart0_write(src, n)){
@@ -123,9 +111,9 @@ int32_t ioctl(int fd, uint32_t op, ...){
         }
     }
     else if(fd == 0x10005000){
-        /*UART1*/
+        //UART1
         if(op == 0){
-            /*read*/
+            //read
             char* dst = va_arg(params, char*);
             int n =va_arg(params, int);
             if(uart1_read(dst, n)){
@@ -137,7 +125,7 @@ int32_t ioctl(int fd, uint32_t op, ...){
 
         }
         else if(op == 1){
-            /*write*/
+            //write
             char* src = va_arg(params, char*);
             int n = va_arg(params, int);
             if(uart1_write(src, n)){
@@ -152,14 +140,14 @@ int32_t ioctl(int fd, uint32_t op, ...){
         }
     }
     else if(fd == 0x1000f000){
-        /*TRACE*/
+        //TRACE
         if(op == 0){
-            /*update seed*/
+            //update seed
             unsigned int value = va_arg(params, unsigned int);
             trace_eventi(value);
         }
         else{
-            /*invalid op*/
+            //invalid op
             return MINEMU_IOCTL_ERROR;
         }
 
@@ -169,3 +157,4 @@ int32_t ioctl(int fd, uint32_t op, ...){
     }
     return 0;
 }
+*/
