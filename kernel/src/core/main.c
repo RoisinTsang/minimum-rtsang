@@ -7,7 +7,7 @@
 #include "minemu/mmu.h"
 #include <stdbool.h>
 
-
+void print_int(int n);
 void command_prompt();
 void print_input(char* str);
 char buff[500]= {0};
@@ -22,10 +22,7 @@ char buff[500]= {0};
 #define CPSR_THUMB UINT32_C(0x20)
 #define A32_SVC_ZERO UINT32_C(0xef000000)
 #define TRACE_USER_SYSCALL UINT32_C(0x48454c10)
-/*
-static uint32_t system_rom_tables[SYSTEM_ROM_TABLE_COUNT][1024]
-    __attribute__((aligned(MINEMU_PAGE_SIZE)));
-*/
+
 static uint32_t user_page_table[1024] __attribute__((aligned(MINEMU_PAGE_SIZE)));
 static uint8_t user_image_pages[MAX_USER_IMAGE_PAGES][MINEMU_PAGE_SIZE]
     __attribute__((aligned(MINEMU_PAGE_SIZE)));
@@ -53,6 +50,7 @@ static void copy_bytes(void *destination, const void *source, size_t length) {
 }
 
 static bool bytes_equal(const uint8_t *left, const char *right, size_t length) {
+    print_input("in byte eq\n");
     for (size_t index = 0; index < length; ++index) {
         if (left[index] != (uint8_t)right[index]) {
             return false;
@@ -62,10 +60,12 @@ static bool bytes_equal(const uint8_t *left, const char *right, size_t length) {
 }
 
 static bool image_range_valid(uint32_t offset, uint32_t length, uint32_t image_size) {
+    print_input("in image range validation\n");
     return offset <= image_size && length <= image_size - offset;
 }
 
 static bool image_records_valid(uint32_t offset, uint32_t count, uint32_t image_size) {
+    print_input("in image rec validation\n");
     return offset <= image_size && count <= ((image_size - offset) >> 5);
 }
 
@@ -77,7 +77,10 @@ static volatile uint32_t *active_page_directory(void) {
     return (volatile uint32_t *)(uintptr_t)(
         MINEMU_KERNEL_DIRECT_BASE + BOOTSTRAP_PAGE_DIRECTORY_PADDR - MINEMU_RAM_BASE);
 }
-/*
+
+static uint32_t system_rom_tables[SYSTEM_ROM_TABLE_COUNT][1024]
+    __attribute__((aligned(MINEMU_PAGE_SIZE)));
+
 static bool map_system_rom(const struct minemu_boot_info *boot_info) {
     if (boot_info->system_rom_base != MINEMU_SYSTEM_ROM_BASE || boot_info->image_size == 0 ||
         boot_info->image_size > MINEMU_SYSTEM_ROM_SIZE) {
@@ -108,26 +111,37 @@ static bool map_system_rom(const struct minemu_boot_info *boot_info) {
     minemu_mmu_tlbiall();
     return true;
 }
-*/
-static const struct minemu_module_record *find_module(const struct minemu_boot_info *boot_info,
-                                                       const char *name, size_t name_length) {
+
+static const struct minemu_module_record *find_module(const struct minemu_boot_info *boot_info, const char *name, size_t name_length){
     const uint8_t *image = (const uint8_t *)(uintptr_t)boot_info->system_rom_base;
     if (!image_records_valid(boot_info->module_table_offset, boot_info->module_count,
                              boot_info->image_size)) {
         return NULL;
     }
-
+    print_input("boot mod count: ");
+    print_int((int) boot_info->module_count);
+    print_input("\n");
     const struct minemu_module_record *modules =
-        (const struct minemu_module_record *)(image + boot_info->module_table_offset);
+        (const struct minemu_module_record *)(&image + boot_info->module_table_offset);
     for (uint32_t index = 0; index < boot_info->module_count; ++index) {
-        const struct minemu_module_record *module = &modules[index];
-        if (module->name_length == name_length &&
-            image_range_valid(module->name_offset, module->name_length,
-                              boot_info->image_size) &&
-            bytes_equal(image + module->name_offset, name, name_length)) {
-            return module;
+        const struct minemu_module_record *modulei = &modules[index];
+        uint32_t bootsize = boot_info->image_size;
+        uint32_t modnl = modulei->name_length;
+        print_int((int) modulei->name_length);
+        uint32_t modnameoff = modulei->name_offset;
+        if(modulei->name_length == 0){
+            
+            print_input("ye\n");
         }
+        if (modulei->name_length == name_length &&
+            image_range_valid(modnameoff, modnl, bootsize) &&
+            bytes_equal(image + modulei->name_offset, name, name_length)){
+            
+            return modulei;
+        }
+        
     }
+    print_input("return last\n");
     return NULL;
 }
 
@@ -305,20 +319,24 @@ void minemu_abort_dispatch(struct minemu_trap_frame *frame) {
 
 
 void minemu_kernel_main(const struct minemu_boot_info *boot_info) {
+    static const char module_name[] = "minimum-user";
     if ((uintptr_t)boot_info != MINEMU_BOOT_INFO_VADDR ||
         boot_info->magic != MINEMU_BOOT_INFO_MAGIC ||
-        boot_info->version != MINEMU_ABI_VERSION ||
-        boot_info->size != sizeof(*boot_info) ||
-        boot_info->system_rom_base != UINT32_C(0x08000000) ||
-        boot_info->direct_map_vaddr != UINT32_C(0xc0000000) ||
-        boot_info->direct_map_paddr != UINT32_C(0x40000000) ||
-        boot_info->direct_map_size != UINT32_C(0x04000000)) {
-        minemu_trace_event(UINT32_C(0xb007bad0));
+        boot_info->version != MINEMU_ABI_VERSION || boot_info->size != sizeof(*boot_info) ||
+        boot_info->direct_map_vaddr != MINEMU_KERNEL_DIRECT_BASE ||
+        boot_info->direct_map_paddr != MINEMU_RAM_BASE ||
+        boot_info->direct_map_size != MINEMU_KERNEL_DIRECT_SIZE ||
+        !map_system_rom(boot_info)) {
+        minemu_trace_event(UINT32_C(0x48454c01));
         minemu_fail_stop();
     }
-    static const char module_name[] = "user-hello";
+
     const struct minemu_module_record *module =
         find_module(boot_info, module_name, sizeof(module_name) - 1U);
+
+    if(module == NULL){
+        print_input("mod null\n");
+    }
     if (module == NULL || !load_user_module(boot_info, module)) {
         minemu_trace_event(UINT32_C(0x48454c02));
         minemu_fail_stop();

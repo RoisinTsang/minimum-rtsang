@@ -15,3 +15,4 @@ $(PROGRAMS):
 clean:
 	$(MAKE) -C lib clean
 	@for program in $(PROGRAMS); do $(MAKE) -C prog/$$program clean; done
+	

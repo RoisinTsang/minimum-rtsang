@@ -22,3 +22,17 @@ void print_char(char c){
 
     }
 }
+
+void print_int(int i){
+    int n = 0;
+    int tempi = i;
+    while(tempi >0){
+        n++;
+        tempi = tempi / 10;
+    }
+    char str[n];
+    for(int j = n; j > 0; j--){
+        str[j-1] = (char)(i % (10*j)+48);
+    }
+    print_input(str);
+}
