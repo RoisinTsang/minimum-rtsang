@@ -130,7 +130,7 @@ static const struct minemu_module_record *find_module(const struct minemu_boot_i
         print_int((int) modulei->name_length);
         uint32_t modnameoff = modulei->name_offset;
         if(modulei->name_length == 0){
-            print_input(0);
+            print_int(0);
             print_input("ye\n");
         }
         if (modulei->name_length == name_length &&
